@@ -20,61 +20,61 @@
 	Read all about the different storage acount types in Azure: https://docs.microsoft.com/en-us/azure/storage/common/storage-account-overview
 	Note 1: Testing has shown that Premium Tier of a General-purpose V2 storage account does not work with Blobfuse. It requires further testing (on my to-do list....)
 	Note 2: A Blobcontainer is required
+	Note 3: Make a note of the storage account keys (Key1)
 
 # BlobFuse Configuration
 
-	In Azure, you may use the ephemeral disks (SSD) available on your VMs to provide a low-latency buffer for blobfuse. In Red Hat, the disk is mounted on '/mnt/resource/*’. Execute as root user.
+	In Azure, you may use the ephemeral disks (SSD) available on your VMs to provide a low-latency buffer for blobfuse. In Red Hat, the disk is mounted on 			'/mnt/resource/*’. Execute as root user.
 
-		# mkdir –p /mnt/resource/blobfusetmp  (see note below)*
-		# sudo chown root /mnt/resource/blobfusetmp
+		# mkdir –p /mnt/resource/tempspace  (see note below)*
+		# sudo chown root /mnt/resource/tempspace
 
-	Note 1: Please check the ephemeral disk as it varies in size. For example, on E32 Type VM’s the ephemeral disk is 512GB. This is enough for a standard database 
-	backup (~200GB). On smaller VM’s the ephemeral disk may not enough to store a database backup. In this case we have created a separate logical volume 
-	(e.g. /blob/cache) which is used temporarily to store the backup (caching). 
+	Note 1: Please check the ephemeral disk as it varies in size. For example, on large VM’s the ephemeral disk is 512GB+. This is enough for a small database 
+	backup (for example ~200GB). On smaller VM’s the ephemeral disk may not enough to store a database backup. In this case you need a separate logical volume 
+	(e.g. /blob/cache) which is used temporarily to cache the backup before copied to the back-end storage account. 
 
-	Create a directory /etc/blobfuse where the blobfuse configuration file will be stored. 
-		# mkdir –p /etc/blobfuse
-	 	# chmod 600 /etc/blobfuse
+	Create a directory /xxx/blobconf where the blobfuse configuration file will be stored. 
+		# mkdir –p /xxx/blobconf
+	 	# chmod 600 /xxx/blobconf
 
 	Create the blobfuse configuration file: 
 		# vi fuse_connection.cfg
 		# chmod 600 fuse_connection.cfg
 
 	Populate the configuration file (fuse_connection.cfg) with the following information:
-	
-		# vi /etc/blobfuse/ fuse_connection.cfg
-		accountName myaccount
-		accountKey storageaccesskey
-		containerName mycontainer
+		# vi /xxx/blobconf/fuse_connection.cfg
+			accountName mystorageaccount
+			accountKey storageaccesskey
+			containerName myblobcontainer
 
 	Create an empty directory for mounting
 		# mkdir –p /myblobspace
 
 # Mount & Automount Process
 
-	Create a script inside /mycontainer with the name blobmount.sh. The contents of the script must contain the blobfuse command along with the parameters required: 
+	Create a script inside /myblobspace or elsewhere with the name blobmount.sh. The contents of the script must contain the blobfuse command along with the parameters 	    required: 
 
-	blobfuse /mycontainer --tmp-path=/mnt/resource/blobfusetmp  --config-file=/etc/blobfuse/fuse_connection.cfg -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120 -o allow_other -o nonempty
+	blobfuse /myblobspace --tmp-path=/mnt/resource/tempspace  --config-file=/xxx/blobconf/fuse_connection.cfg -o attr_timeout=240 -o entry_timeout=240 -o 			negative_timeout=120 -o allow_other -o nonempty
 
 	Note 1: Change the permissions of the file to 700
  
 	Edit the /etc/fstab file and add the following entry so the filesystem can be automounted when the server is rebooted:
 
-	/myblobspace/blobmount.sh /mnt/resource/blobfusetmp  fuse _netdev,nofail    
+	/myblobspace/blobrun.sh /mnt/resource/tempspace  fuse _netdev,nofail    
 
 	List the filesystems and test by creating files or folders – see example below:
 	blobfuse         8124792 2134020   5555012  28% /myblobspace     
 	
 	Note 1: /myblobspace may not appear in the filesystem list (df -k) when the server is rebooted but still mounted (must be checked - on my to do list....)
 
-	In /mycontainer create any sub-directories using the mkdir –p command.
+	In /myblobspace create any sub-directories using the mkdir –p command.
 
 
 # Unmount Process
 
 	To unmount the blobfuse filesystem: 
 
-		# fusermount –u /mycontainer
+		# fusermount –u /myblobspace
 
 	Note 1: Do not use the standard mount command to unmount the blobfuse filesystem
 	Note 2: Do not change the permissions of the blobfuse filesystem using the standard commands. Permissions change by using the “allow_other” flag in the command path
