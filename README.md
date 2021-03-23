@@ -54,7 +54,8 @@
 
 # Mount & Automount Process
 
-	Create a script inside /usr/local/bin or elsewhere with the name blobmount.sh. The contents of the script must contain the blobfuse command along with the parameters 	    required: 
+	Create a script inside /usr/local/bin or elsewhere with the name blobmount.sh. The contents of the script must contain the blobfuse command along 
+	with the parameters required: 
 
 	blobfuse /myblobspace --tmp-path=/mnt/resource/tempspace  --config-file=/xxx/blobconf/fuse_connection.cfg -o attr_timeout=240 -o entry_timeout=240 -o 			negative_timeout=120 -o allow_other -o nonempty
 
