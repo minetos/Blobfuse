@@ -1,9 +1,6 @@
 # Blobfuse
 # Blobfuse Configuration 
 	A quick guide on how to install and configure Blobfuse on a Linux RHEL 7+ Server.
-# Blobfuse
-# Blobfuse Configuration 
-	A quick guide on how to install and configure Blobfuse on a Linux RHEL 7+ Server.
 
 # Installation Steps
  	Go to https://packages.microsoft.com/config/rhel/6/packages-microsoft-prod.rpm
@@ -64,8 +61,6 @@
 	Add the following line in the root crontab so the container can be mounted when the server reboots: 
 	
 	@reboot /usr/local/bin/blobmount.sh
-	
-	
 	
 	Alternatively, edit the /etc/fstab file and add the following entry so the filesystem can be automounted when the server is rebooted (not recommended)
 
