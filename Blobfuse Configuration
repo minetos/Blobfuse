@@ -52,21 +52,26 @@
 
 # Mount & Automount Process
 
-	Create a script inside /myblobspace or elsewhere with the name blobmount.sh. The contents of the script must contain the blobfuse command along with the parameters 	    required: 
+	Create a script inside /usr/local/bin or elsewhere with the name blobmount.sh. The contents of the script must contain the blobfuse command along with the parameters 	    required: 
 
 	blobfuse /myblobspace --tmp-path=/mnt/resource/tempspace  --config-file=/xxx/blobconf/fuse_connection.cfg -o attr_timeout=240 -o entry_timeout=240 -o 			negative_timeout=120 -o allow_other -o nonempty
 
 	Note 1: Change the permissions of the file to 700
  
-	Edit the /etc/fstab file and add the following entry so the filesystem can be automounted when the server is rebooted:
+	Add the following line in the root crontab so the container can be mounted when the server reboots: 
+	
+	@reboot /usr/local/bin/blobmount.sh
+	
+	
+	
+	Alternatively, edit the /etc/fstab file and add the following entry so the filesystem can be automounted when the server is rebooted (not recommended)
 
 	/myblobspace/blobrun.sh /mnt/resource/tempspace  fuse _netdev,nofail    
 
+	
 	List the filesystems and test by creating files or folders – see example below:
 	blobfuse         8124792 2134020   5555012  28% /myblobspace     
 	
-	Note 1: /myblobspace may not appear in the filesystem list (df -k) when the server is rebooted but still mounted (must be checked - on my to do list....)
-
 	In /myblobspace create any sub-directories using the mkdir –p command.
 
 
