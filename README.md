@@ -24,7 +24,9 @@
 
 # BlobFuse Configuration
 
-	In Azure, you may use the ephemeral disks (SSD) available on your VMs to provide a low-latency buffer for blobfuse. In Red Hat, the disk is mounted on 			'/mnt/resource/*’. Execute as root user.
+	In Azure, you may use the ephemeral disks (SSD) available on your VMs to provide a low-latency buffer for blobfuse. 
+	In Red Hat, the disk is mounted on '/mnt/resource/*’. 
+	Execute as root user.
 
 		# mkdir –p /mnt/resource/tempspace  (see note below)*
 		# sudo chown root /mnt/resource/tempspace
